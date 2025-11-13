@@ -1,0 +1,29 @@
+# Core dependencies
+langchain
+langchain-community
+langchain-openai
+langgraph
+langchain-core
+
+# RAG dependencies
+faiss-cpu
+pypdf
+sentence-transformers
+
+# Local Hugging Face LLM dependencies
+transformers
+torch
+accelerate
+
+# Data models
+pydantic
+
+# Utilities
+python-dotenv
+numpy
+
+# Optional: external APIs (not used with local models)
+# openai
+# tiktoken
+# tavily-python
+
