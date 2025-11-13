@@ -1,0 +1,178 @@
+[
+  {
+    "question": "I had both Advantage and Disadvantage on an attack, so I treated it as a normal attack. Is that right?",
+    "situation": "During combat, one ability gave me Advantage while a condition gave me Disadvantage on the same attack.",
+    "expected_answer": {
+      "explanation": "Advantage and Disadvantage cancel each other out, resulting in a single normal attack modifier draw.",
+      "is_correct": true,
+      "category": "Combat",
+      "confidence": 0.98,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I made a ranged attack targeting two enemies and drew a single modifier for both. Is that allowed?",
+    "situation": "A ranged ability targeted two different enemies. I drew one modifier card and applied it to both targets.",
+    "expected_answer": {
+      "explanation": "You must draw a separate attack modifier card for each individual target of an attack.",
+      "is_correct": false,
+      "category": "Combat",
+      "confidence": 0.99,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I infused Fire with the first part of my turn and immediately consumed Fire with the second part. Was that legal?",
+    "situation": "My top action created Fire. On the same turn, my bottom action tried to consume Fire.",
+    "expected_answer": {
+      "explanation": "Elements you create become available after your entire action, so you cannot consume an element you generated earlier in the same turn.",
+      "is_correct": false,
+      "category": "Combat",
+      "confidence": 0.97,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I moved through a money token but didn’t end my turn on it and still collected it. Was that correct?",
+    "situation": "During movement, I passed over a coin hex without ending my turn there and picked it up anyway.",
+    "expected_answer": {
+      "explanation": "You only collect money by ending your turn on it or by using a Loot ability that specifies collection.",
+      "is_correct": false,
+      "category": "Scenario",
+      "confidence": 0.95,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "A Guard with Retaliate 2 (no range) damaged my archer who attacked from 3 hexes away. Is that correct?",
+    "situation": "My ranged attack was from 3 hexes away, and we still applied the monster’s Retaliate 2.",
+    "expected_answer": {
+      "explanation": "Retaliate without a range value only affects adjacent attackers. It should not apply to a target 3 hexes away.",
+      "is_correct": false,
+      "category": "Combat",
+      "confidence": 0.98,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "A flying enemy moved over a trap without triggering it. Is that right?",
+    "situation": "A Flying monster’s movement path crossed a trap hex, and we did not apply trap damage.",
+    "expected_answer": {
+      "explanation": "Flying ignores terrain effects during movement, including traps and hazardous terrain, so the trap is not triggered by moving over it.",
+      "is_correct": true,
+      "category": "Combat",
+      "confidence": 0.96,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I opened a door during my move; we revealed the room and the new monsters acted later that same round. Correct?",
+    "situation": "After opening a door mid-turn, we revealed enemies, drew their ability card, and they took turns on their initiative if it hadn’t passed.",
+    "expected_answer": {
+      "explanation": "When a room is revealed, those monsters draw an ability and will act on their initiative that round if their initiative order is still upcoming.",
+      "is_correct": true,
+      "category": "Scenario",
+      "confidence": 0.97,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "During a long rest, I refreshed spent items and healed 2 but did not lose a card from my discard. Was that correct?",
+    "situation": "At long rest, I recovered my discard pile and refreshed spent items without losing a card.",
+    "expected_answer": {
+      "explanation": "A long rest heals 2, refreshes spent items, and returns all discards, but you must lose one card from your discard pile as part of the rest.",
+      "is_correct": false,
+      "category": "Character",
+      "confidence": 0.96,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "At the start of the round I had 0 in hand and 1 in discard; I short rested and kept playing. Is that legal?",
+    "situation": "With no cards in hand and one in discard, I performed a short rest and expected to continue acting.",
+    "expected_answer": {
+      "explanation": "A short rest loses one random discard and returns the rest. With only one discard, you would lose it and have no playable cards, resulting in exhaustion.",
+      "is_correct": false,
+      "category": "Character",
+      "confidence": 0.95,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "Our party levels were 2, 3, and 4 (average 3). We set scenario level to 2. Is that right?",
+    "situation": "We computed scenario level by averaging character levels (3) and rounding up after dividing by two.",
+    "expected_answer": {
+      "explanation": "Scenario level equals the average character level divided by 2, rounded up. Average 3 → 3/2 = 1.5 → round up to 2.",
+      "is_correct": true,
+      "category": "BoardGameSetup",
+      "confidence": 0.99,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "After drawing a 2x from my attack modifier deck, we shuffled the deck at end of the round. Correct?",
+    "situation": "I flipped a 2x during my attack. We waited until end of round to shuffle that modifier deck.",
+    "expected_answer": {
+      "explanation": "When a Null or 2x is drawn, you shuffle that modifier discard back into the deck at the end of the round.",
+      "is_correct": true,
+      "category": "Combat",
+      "confidence": 0.98,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I made a ranged attack while adjacent to my target and did not apply Disadvantage. Was that correct?",
+    "situation": "I was standing next to the enemy but used a ranged attack without Disadvantage.",
+    "expected_answer": {
+      "explanation": "Ranged attacks made against adjacent targets have Disadvantage unless otherwise specified.",
+      "is_correct": false,
+      "category": "Combat",
+      "confidence": 0.97,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "We allowed line of sight through an open door for a ranged attack. Is that allowed?",
+    "situation": "The attacker was in one room, the defender in the next, with an open door between them. We ruled line of sight existed.",
+    "expected_answer": {
+      "explanation": "Open doors do not block line of sight. If a clear line can be traced through the open doorway, the attack is valid.",
+      "is_correct": true,
+      "category": "Combat",
+      "confidence": 0.93,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I pushed an enemy into a trap; we applied the trap damage and left the enemy on that hex. Correct?",
+    "situation": "A push effect moved a monster into a trap hex, and we resolved the trap immediately.",
+    "expected_answer": {
+      "explanation": "When a figure is forced into a trap, it triggers immediately, suffering the trap’s effect, and remains on that hex unless otherwise moved.",
+      "is_correct": true,
+      "category": "Combat",
+      "confidence": 0.95,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I had POISON and used Heal 3; we removed POISON and also gained 3 HP. Was that correct?",
+    "situation": "While POISONED, I resolved a Heal action and both cleared the condition and recovered HP.",
+    "expected_answer": {
+      "explanation": "When you are POISONED, a Heal first removes POISON and restores no HP for that Heal instance.",
+      "is_correct": false,
+      "category": "Combat",
+      "confidence": 0.99,
+      "source": "rulebook"
+    }
+  },
+  {
+    "question": "I was INVISIBLE; the monsters focused and attacked my ally instead even though I was closer. Correct?",
+    "situation": "Monsters chose a visible target further away instead of me while I was Invisible.",
+    "expected_answer": {
+      "explanation": "Invisible figures are ignored when determining focus unless no visible targets exist, so attacking your ally was correct.",
+      "is_correct": true,
+      "category": "Combat",
+      "confidence": 0.98,
+      "source": "rulebook"
+    }
+  }
+]

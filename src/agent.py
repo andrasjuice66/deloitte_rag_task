@@ -282,7 +282,7 @@ class GloomhavenAgent:
         
         return workflow.compile()
     
-    def answer_question(self, question: str) -> AgentResponse:
+    def answer_question(self, question: str = None, needs_web_search: bool = False) -> AgentResponse:
         """
         Answer a question about Gloomhaven rules.
         
@@ -298,7 +298,7 @@ class GloomhavenAgent:
             "retrieved_docs": None,
             "web_results": None,
             "answer": None,
-            "needs_web_search": False
+            "needs_web_search": needs_web_search
         }
         
         final_state = self.graph.invoke(initial_state)

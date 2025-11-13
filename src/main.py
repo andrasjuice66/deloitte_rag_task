@@ -7,7 +7,6 @@ from .config import Config
 from .rag_system import RAGSystem
 from .web_search import WebSearchTool
 from .agent import GloomhavenAgent
-from .synthetic_data import SyntheticDataGenerator
 from .evaluator import AgentEvaluator
 from .models import AgentResponse
 
@@ -40,7 +39,6 @@ class GloomhavenRulebookSystem:
         self.rag_system: Optional[RAGSystem] = None
         self.web_search_tool: Optional[WebSearchTool] = None
         self.agent: Optional[GloomhavenAgent] = None
-        self.data_generator: Optional[SyntheticDataGenerator] = None
         self.evaluator: Optional[AgentEvaluator] = None
         
     def setup(self, force_recreate_vectorstore: bool = False):
@@ -78,21 +76,13 @@ class GloomhavenRulebookSystem:
             model_name=self.model_name
         )
         
-        # Initialize data generator (note: synthetic data generation may not work well with small models)
-        print("\n4. Initializing synthetic data generator...")
-        self.data_generator = SyntheticDataGenerator(
-            llm=self.custom_llm,
-            use_huggingface=self.use_huggingface,
-            model_name=self.model_name
-        )
-        
         # Initialize evaluator
-        print("\n5. Initializing evaluator...")
+        print("\n4. Initializing evaluator...")
         self.evaluator = AgentEvaluator(agent=self.agent)
         
         print("\n✓ System setup complete!")
     
-    def ask_question(self, question: str) -> AgentResponse:
+    def ask_question(self, question: str = None, needs_web_search: bool = False) -> AgentResponse:
         """
         Ask a question to the agent.
         
@@ -105,56 +95,14 @@ class GloomhavenRulebookSystem:
         if self.agent is None:
             raise ValueError("System not initialized. Call setup() first.")
         
-        return self.agent.answer_question(question)
-    
-    def generate_evaluation_dataset(self, save_path: Optional[Path] = None):
-        """
-        Generate a synthetic evaluation dataset.
-        
-        Args:
-            save_path: Path to save the dataset (optional)
-            
-        Returns:
-            List of question-answer pairs
-        """
-        if self.data_generator is None:
-            raise ValueError("System not initialized. Call setup() first.")
-        
-        print("Generating evaluation dataset...")
-        
-        # Create seed examples
-        seed_examples = self.data_generator.create_seed_examples()
-        print(f"Created {len(seed_examples)} seed examples.")
-        
-        # Generate synthetic examples
-        dataset = self.data_generator.generate_synthetic_dataset(
-            seed_examples=seed_examples,
-            num_examples=Config.SYNTHETIC_DATASET_SIZE
-        )
-        print(f"Generated {len(dataset)} total examples.")
-        
-        # Save if path provided
-        if save_path:
-            import json
-            save_path = Path(save_path)
-            save_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(save_path, 'w') as f:
-                json.dump(
-                    [qa.dict() for qa in dataset],
-                    f,
-                    indent=2
-                )
-            print(f"Saved dataset to {save_path}")
-        
-        return dataset
+        return self.agent.answer_question(question=question, needs_web_search=needs_web_search)
     
     def evaluate(self, dataset=None, verbose: bool = True):
         """
         Evaluate the agent on a dataset.
         
         Args:
-            dataset: Dataset to evaluate on. If None, generates a new one.
+            dataset: Dataset to evaluate on. If None, loads from JSON file.
             verbose: Whether to print detailed results
             
         Returns:
@@ -164,8 +112,12 @@ class GloomhavenRulebookSystem:
             raise ValueError("System not initialized. Call setup() first.")
         
         if dataset is None:
-            print("No dataset provided. Generating one...")
-            dataset = self.generate_evaluation_dataset()
+            # Load dataset from JSON instead of generating on-the-fly
+            dataset_path: Path = Config.SYNTHETIC_DATASET_PATH
+            if not dataset_path.exists():
+                raise FileNotFoundError(f"Synthetic dataset not found at {dataset_path}. Please ensure the file exists.")
+            print(f"Loading evaluation dataset from {dataset_path}...")
+            dataset = AgentEvaluator.load_dataset(dataset_path)
         
         print(f"\nEvaluating agent on {len(dataset)} questions...")
         metrics = self.evaluator.evaluate_dataset(dataset, verbose=verbose)

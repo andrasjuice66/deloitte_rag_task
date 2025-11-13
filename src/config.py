@@ -14,6 +14,7 @@ class Config:
     DATA_DIR = PROJECT_ROOT / "data"
     VECTOR_STORE_DIR = DATA_DIR / "vector_store"
     PDF_PATH = DATA_DIR / "gloomhaven_rulebook.pdf"
+    SYNTHETIC_DATASET_PATH = DATA_DIR / "synhetic_dataset.json"
     
     EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
     LLM_MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct" # "microsoft/phi-1_5"   

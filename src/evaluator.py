@@ -2,9 +2,12 @@
 
 from typing import List
 import time
+import json
+from pathlib import Path
 
 from .models import QuestionAnswerPair, EvaluationResult, AgentResponse
 from .agent import GloomhavenAgent
+from .config import Config
 
 
 class AgentEvaluator:
@@ -140,4 +143,20 @@ class AgentEvaluator:
             print(f"  - is_correct: {'✓' if result.is_correct_match else '✗'}")
             print(f"  - category: {'✓' if result.category_match else '✗'}")
             print(f"  - overall: {'✓' if result.overall_correct else '✗'}")
+    
+    @staticmethod
+    def load_dataset(file_path: Path = None) -> List[QuestionAnswerPair]:
+        """
+        Load a dataset from JSON into QuestionAnswerPair objects.
+        
+        Args:
+            file_path: Optional path override; defaults to Config.SYNTHETIC_DATASET_PATH
+        
+        Returns:
+            List of QuestionAnswerPair
+        """
+        path = file_path or Config.SYNTHETIC_DATASET_PATH
+        with open(path, "r") as f:
+            data = json.load(f)
+        return [QuestionAnswerPair(**item) for item in data]
 
