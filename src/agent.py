@@ -15,6 +15,42 @@ from .config import Config
 from .llm import build_llm
 
 
+def _extract_first_json_object(text: str) -> str:
+    """
+    Extract the first top-level JSON object from a mixed-content string.
+    Handles nested braces and quoted strings.
+    Raises ValueError if no balanced JSON object is found.
+    """
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object start found")
+    depth = 0
+    in_string = False
+    escape = False
+    i = start
+    while i < len(text):
+        ch = text[i]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+        else:
+            if ch == '"':
+                in_string = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    return text[start:end].strip()
+        i += 1
+    raise ValueError("Unbalanced JSON braces")
+
+
 class AgentState(TypedDict):
     """State of the agent."""
     messages: Annotated[Sequence[BaseMessage], operator.add]
@@ -120,16 +156,7 @@ class GloomhavenAgent:
         
         # Parse the response
         try:
-            print("RAW response text:")
-            print(response_text)
-
-            # Try to extract JSON from the response
-            if "```json" in response_text:
-                json_str = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                json_str = response_text.split("```")[1].split("```")[0].strip()
-            else:
-                json_str = response_text
+            json_str = _extract_first_json_object(response_text)
             
             response_dict = json.loads(json_str)
             answer = AgentResponse(**response_dict)
@@ -204,7 +231,7 @@ class GloomhavenAgent:
             elif "```" in response_text:
                 json_str = response_text.split("```")[1].split("```")[0].strip()
             else:
-                json_str = response_text
+                json_str = _extract_first_json_object(response_text)
             
             response_dict = json.loads(json_str)
             answer = AgentResponse(**response_dict)

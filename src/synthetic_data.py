@@ -56,16 +56,19 @@ class SyntheticDataGenerator:
             trust_remote_code=True
         )
         
-        pipe = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            max_length=Config.LLM_MAX_LENGTH,
-            temperature=0.7,  # Higher temperature for more creative generation
-            do_sample=True,
-            top_p=0.95,
-            device=device
-        )
+        # Build pipeline kwargs and avoid passing `device` if model is managed by accelerate (hf_device_map set)
+        pipeline_kwargs = {
+            "model": model,
+            "tokenizer": tokenizer,
+            "max_length": Config.LLM_MAX_LENGTH,
+            "temperature": 0.7,
+            "do_sample": True,
+            "top_p": 0.95,
+        }
+        if getattr(model, "hf_device_map", None) is None:
+            pipeline_kwargs["device"] = device
+        
+        pipe = pipeline("text-generation", **pipeline_kwargs)
         
         return HuggingFacePipeline(pipeline=pipe)
     
