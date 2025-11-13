@@ -16,7 +16,7 @@ class Config:
     PDF_PATH = DATA_DIR / "gloomhaven_rulebook.pdf"
     
     EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-    LLM_MODEL = "Qwen/Qwen2-1.5B-Instruct"  # Local Hugging Face model
+    LLM_MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct" # "microsoft/phi-1_5"   
     LLM_TEMPERATURE = 0.1
     LLM_MAX_LENGTH = 2048
     USE_LOCAL_LLM = True  # Use local Hugging Face model instead of API
