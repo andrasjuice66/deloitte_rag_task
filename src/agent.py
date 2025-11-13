@@ -83,12 +83,9 @@ class GloomhavenAgent:
             model_name: Hugging Face model name (defaults to Config.LLM_MODEL)
         """
         self.rag_system = rag_system
-        # Keep provided web_search_tool regardless of config flag; the tool itself
-        # will decide whether to use API or fallback.
         self.web_search_tool = web_search_tool
         self.model_name = model_name or Config.LLM_MODEL
         
-        # Initialize simple local Hugging Face LLM callable
         if llm is not None:
             self.llm = llm
         else:

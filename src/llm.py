@@ -1,5 +1,3 @@
-"""Simple Hugging Face LLM builder that returns a callable(prompt) -> str."""
-
 from typing import Callable, Optional
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
@@ -30,7 +28,6 @@ def build_llm(
         model=model,
         tokenizer=tok,
         max_new_tokens=max_new_tokens,
-        # do_sample=(temperature > 0),
         temperature=temperature,
         return_full_text=False,
     )
