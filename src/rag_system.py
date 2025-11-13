@@ -54,7 +54,6 @@ class RAGSystem:
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=Config.CHUNK_SIZE,
             chunk_overlap=Config.CHUNK_OVERLAP,
-            # length_function=len,
         )
         
         self.documents = text_splitter.split_documents(documents)

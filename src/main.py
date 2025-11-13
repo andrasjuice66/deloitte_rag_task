@@ -58,13 +58,10 @@ class GloomhavenRulebookSystem:
         self.rag_system = RAGSystem(pdf_path=self.pdf_path)
         self.rag_system.setup(force_recreate=force_recreate_vectorstore)
         
-        # Initialize web search tool (disabled by default for local-only mode)
-        if Config.ENABLE_WEB_SEARCH:
-            print("\n2. Initializing web search tool...")
-            self.web_search_tool = WebSearchTool()
-        else:
-            print("\n2. Web search disabled (using local models only)")
-            self.web_search_tool = None
+        # Initialize web search tool. Even if remote web search is disabled,
+        # we still create the tool so that its internal fallback can be used.
+        print("\n2. Initializing web search tool (with fallback)...")
+        self.web_search_tool = WebSearchTool()
         
         # Initialize agent
         print("\n3. Initializing agent...")

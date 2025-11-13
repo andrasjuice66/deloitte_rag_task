@@ -21,6 +21,7 @@ pydantic
 # Utilities
 python-dotenv
 numpy
+requests
 
 # Optional: external APIs (not used with local models)
 # openai

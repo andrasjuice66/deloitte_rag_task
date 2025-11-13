@@ -77,13 +77,15 @@ class GloomhavenAgent:
         
         Args:
             rag_system: Initialized RAG system
-            web_search_tool: Web search tool (optional, disabled by default)
+            web_search_tool: Web search tool (optional; if not provided, web search can be skipped)
             llm: Optional pre-initialized HF pipeline (for advanced use)
             use_huggingface: Unused; kept for compatibility (always True)
             model_name: Hugging Face model name (defaults to Config.LLM_MODEL)
         """
         self.rag_system = rag_system
-        self.web_search_tool = web_search_tool if Config.ENABLE_WEB_SEARCH else None
+        # Keep provided web_search_tool regardless of config flag; the tool itself
+        # will decide whether to use API or fallback.
+        self.web_search_tool = web_search_tool
         self.model_name = model_name or Config.LLM_MODEL
         
         # Initialize simple local Hugging Face LLM callable
@@ -249,7 +251,7 @@ class GloomhavenAgent:
     
     def _should_search_web(self, state: AgentState) -> str:
         """Decide whether to search the web."""
-        if state.get("needs_web_search", False) and self.web_search_tool is not None:
+        if state.get("needs_web_search", False):
             return "search_web"
         return "end"
     

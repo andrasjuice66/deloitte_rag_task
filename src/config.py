@@ -18,6 +18,8 @@ class Config:
     
     EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
     LLM_MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct" # "microsoft/phi-1_5"   
+    # Backwards-compat alias used elsewhere in code
+    LLM_MODEL = LLM_MODEL_NAME
     LLM_TEMPERATURE = 0.1
     LLM_MAX_LENGTH = 2048
     USE_LOCAL_LLM = True  # Use local Hugging Face model instead of API
