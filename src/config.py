@@ -2,6 +2,9 @@
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Config:
@@ -14,10 +17,9 @@ class Config:
     PDF_PATH = DATA_DIR / "gloomhaven_rulebook.pdf"
     
     EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-    LLM_MODEL = "microsoft/phi-1_5"  # Local Hugging Face model
+    LLM_MODEL = "Qwen/Qwen2.5-3B-Instruct"  
     LLM_TEMPERATURE = 0.1
     LLM_MAX_LENGTH = 2048
-    USE_LOCAL_LLM = True  # Use local Hugging Face model instead of API
     
     # RAG configurations
     CHUNK_SIZE = 1000
@@ -30,16 +32,7 @@ class Config:
     # Evaluation
     SYNTHETIC_DATASET_SIZE = 15
     
-    # API Keys (from environment) - Not used with local models
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
     
-    # Disable web search when using local models only
-    ENABLE_WEB_SEARCH = False
-    
-    @classmethod
-    def ensure_directories(cls):
-        """Ensure all required directories exist."""
-        cls.DATA_DIR.mkdir(exist_ok=True)
-        cls.VECTOR_STORE_DIR.mkdir(exist_ok=True)
+
 

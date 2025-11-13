@@ -6,17 +6,13 @@ import json
 
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from langchain_community.chat_models import ChatOllama
-from langchain_community.llms import HuggingFacePipeline
 from langgraph.graph import StateGraph, END
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-import torch
 
 from .models import AgentResponse, RuleCategoryEnum
 from .rag_system import RAGSystem
 from .web_search import WebSearchTool
 from .config import Config
+from .llm import build_llm
 
 
 class AgentState(TypedDict):
@@ -38,7 +34,7 @@ class GloomhavenAgent:
         web_search_tool: Optional[WebSearchTool] = None,
         llm: Optional[any] = None,
         use_huggingface: bool = True,
-        model_name: str = None
+        model_name: Optional[str] = None
     ):
         """
         Initialize the Gloomhaven agent.
@@ -46,61 +42,36 @@ class GloomhavenAgent:
         Args:
             rag_system: Initialized RAG system
             web_search_tool: Web search tool (optional, disabled by default)
-            llm: Language model to use (if None, will create from config)
-            use_huggingface: Whether to use a local Hugging Face model
-            model_name: Name of Hugging Face model (defaults to Config.LLM_MODEL)
+            llm: Optional pre-initialized HF pipeline (for advanced use)
+            use_huggingface: Unused; kept for compatibility (always True)
+            model_name: Hugging Face model name (defaults to Config.LLM_MODEL)
         """
         self.rag_system = rag_system
         self.web_search_tool = web_search_tool if Config.ENABLE_WEB_SEARCH else None
+        self.model_name = model_name or Config.LLM_MODEL
         
-        # Initialize LLM
+        # Initialize simple local Hugging Face LLM callable
         if llm is not None:
             self.llm = llm
-        elif use_huggingface or Config.USE_LOCAL_LLM:
-            model_name = model_name or Config.LLM_MODEL
-            print(f"Loading Hugging Face model: {model_name}")
-            self.llm = self._create_huggingface_llm(model_name)
         else:
-            # Fallback to OpenAI (not recommended per user request)
-            self.llm = ChatOpenAI(
-                model=Config.LLM_MODEL,
-                temperature=Config.LLM_TEMPERATURE
+            self.llm = build_llm(
+                model_name=self.model_name,
+                max_new_tokens=max(128, Config.LLM_MAX_LENGTH // 2),
+                temperature=Config.LLM_TEMPERATURE,
             )
         
         # Build the graph
         self.graph = self._build_graph()
     
-    def _create_huggingface_llm(self, model_name: str):
-        """Create a Hugging Face LLM pipeline."""
-        # Determine device
-        device = 0 if torch.cuda.is_available() else -1
-        device_str = "cuda" if torch.cuda.is_available() else "cpu"
+    def _invoke_llm_with_prompt(self, prompt: ChatPromptTemplate, **kwargs) -> str:
+        """Format a chat prompt to text and run it via the simple llm(prompt)->str."""
+        try:
+            prompt_text = prompt.format_prompt(**kwargs).to_string()
+        except Exception:
+            messages = prompt.format_messages(**kwargs)
+            prompt_text = "\n".join([m.content for m in messages])
         
-        print(f"Using device: {device_str}")
-        
-        # Load tokenizer and model
-        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto" if torch.cuda.is_available() else None,
-            trust_remote_code=True
-        )
-        
-        # Create pipeline
-        pipe = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            max_length=Config.LLM_MAX_LENGTH,
-            temperature=Config.LLM_TEMPERATURE,
-            do_sample=True,
-            top_p=0.95,
-            device=device
-        )
-        
-        # Wrap in LangChain
-        return HuggingFacePipeline(pipeline=pipe)
+        return self.llm(prompt_text)
     
     def _retrieve_from_rulebook(self, state: AgentState) -> AgentState:
         """Retrieve relevant information from the rulebook."""
@@ -141,12 +112,17 @@ class GloomhavenAgent:
             ("human", "{question}")
         ])
         
-        messages = prompt.format_messages(context=context, question=question)
-        response = self.llm.invoke(messages)
+        response_text = self._invoke_llm_with_prompt(
+            prompt,
+            context=context,
+            question=question
+        )
         
         # Parse the response
         try:
-            response_text = response.content
+            print("RAW response text:")
+            print(response_text)
+
             # Try to extract JSON from the response
             if "```json" in response_text:
                 json_str = response_text.split("```json")[1].split("```")[0].strip()
@@ -197,33 +173,32 @@ class GloomhavenAgent:
         
         prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert on the Gloomhaven board game rules. 
-Based on the provided rulebook context and web search results, answer the user's question.
+        Based on the provided rulebook context and web search results, answer the user's question.
 
-Provide a structured response in JSON format with the following fields:
-- explanation: A detailed explanation based on the rules
-- is_correct: Boolean indicating if the user handled the situation correctly
-- category: One of [BoardGameSetup, Combat, Scenario, Character]
-- confidence: A confidence score between 0 and 1
-- source: "web" since we're incorporating web results
+        Provide a structured response in JSON format with the following fields:
+        - explanation: A detailed explanation based on the rules
+        - is_correct: Boolean indicating if the user handled the situation correctly
+        - category: One of [BoardGameSetup, Combat, Scenario, Character]
+        - confidence: A confidence score between 0 and 1
+        - source: "web" since we're incorporating web results
 
-Rulebook context:
-{rulebook_context}
+        Rulebook context:
+        {rulebook_context}
 
-Web search results:
-{web_context}"""),
-            ("human", "{question}")
-        ])
+        Web search results:
+        {web_context}"""),
+                ("human", "{question}")
+            ])
         
-        messages = prompt.format_messages(
+        response_text = self._invoke_llm_with_prompt(
+            prompt,
             rulebook_context=rulebook_context,
             web_context=web_context,
             question=question
         )
-        response = self.llm.invoke(messages)
         
         # Parse the response
         try:
-            response_text = response.content
             if "```json" in response_text:
                 json_str = response_text.split("```json")[1].split("```")[0].strip()
             elif "```" in response_text:

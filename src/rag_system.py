@@ -46,13 +46,6 @@ class RAGSystem:
         Returns:
             List of document chunks
         """
-        if not self.pdf_path.exists():
-            raise FileNotFoundError(
-                f"PDF not found at {self.pdf_path}. "
-                f"Please download it from: "
-                f"https://cdn.1j1ju.com/medias/8d/c5/21-gloomhaven-rulebook.pdf"
-            )
-        
         print(f"Loading PDF from {self.pdf_path}...")
         loader = PyPDFLoader(str(self.pdf_path))
         documents = loader.load()
@@ -61,7 +54,7 @@ class RAGSystem:
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=Config.CHUNK_SIZE,
             chunk_overlap=Config.CHUNK_OVERLAP,
-            length_function=len,
+            # length_function=len,
         )
         
         self.documents = text_splitter.split_documents(documents)
@@ -69,16 +62,12 @@ class RAGSystem:
         
         return self.documents
     
-    def create_vectorstore(self, documents: Optional[List[Document]] = None):
+    def create_vectorstore(self):
         """
         Create a vector store from documents.
-        
-        Args:
-            documents: List of documents to index. If None, uses self.documents
         """
-        docs = documents or self.documents
-        if not docs:
-            raise ValueError("No documents to create vector store from.")
+        docs = self.documents
+
         
         print("Creating vector store...")
         self.vectorstore = FAISS.from_documents(
@@ -87,22 +76,21 @@ class RAGSystem:
         )
         print("Vector store created successfully.")
     
-    def save_vectorstore(self, path: Optional[Path] = None):
+    def save_vectorstore(self):
         """Save the vector store to disk."""
         if self.vectorstore is None:
             raise ValueError("No vector store to save.")
         
-        save_path = path or self.vector_store_path
+        save_path = self.vector_store_path
         save_path.mkdir(parents=True, exist_ok=True)
         
         print(f"Saving vector store to {save_path}...")
         self.vectorstore.save_local(str(save_path))
         print("Vector store saved successfully.")
     
-    def load_vectorstore(self, path: Optional[Path] = None):
+    def load_vectorstore(self):
         """Load the vector store from disk."""
-        load_path = path or self.vector_store_path
-        
+        load_path =  self.vector_store_path
         if not load_path.exists():
             raise FileNotFoundError(f"Vector store not found at {load_path}")
         
