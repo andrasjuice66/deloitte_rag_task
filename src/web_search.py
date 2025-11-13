@@ -63,61 +63,7 @@ class WebSearchTool:
             
         except Exception as e:
             print(f"Error during web search, using fallback: {e}")
-            return self._fallback_search(query)
-    
-    def _fallback_search(self, query: str) -> str:
-        """
-        Fallback search using DuckDuckGo Instant Answer API (no API key required).
-        This provides a lightweight, dependency-free backup when Tavily is unavailable.
-        """
-        try:
-            resp = requests.get(
-                "https://api.duckduckgo.com/",
-                params={
-                    "q": query,
-                    "format": "json",
-                    "no_html": 1,
-                    "skip_disambig": 1,
-                    "no_redirect": 1,
-                },
-                timeout=10,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            
-            parts: List[str] = []
-            abstract = (data or {}).get("AbstractText") or (data or {}).get("Abstract")
-            if abstract:
-                parts.append(f"1. DuckDuckGo Instant Answer\n{abstract}\n")
-            
-            related = (data or {}).get("RelatedTopics") or []
-            # Flatten nested 'Topics' levels if present
-            flat_related = []
-            for item in related:
-                if isinstance(item, dict) and "Topics" in item:
-                    flat_related.extend(item.get("Topics", []))
-                else:
-                    flat_related.append(item)
-            
-            for i, item in enumerate(flat_related[: Config.MAX_SEARCH_RESULTS], start=2 if abstract else 1):
-                if not isinstance(item, dict):
-                    continue
-                text = item.get("Text") or item.get("Result") or ""
-                url = item.get("FirstURL") or ""
-                if text or url:
-                    parts.append(f"{i}. {text}\nSource: {url}\n")
-            
-            if not parts:
-                return "No results found via fallback search."
-            return "\n".join(parts)
-        
-        except Exception as e:
-            return (
-                "Fallback web search failed. "
-                "Please set TAVILY_API_KEY in your environment to enable full web search. "
-                f"Details: {e}"
-            )
-    
+                
     def as_langchain_tool(self) -> Tool:
         """
         Convert to a LangChain Tool.

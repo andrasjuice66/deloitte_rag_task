@@ -1,5 +1,3 @@
-"""Configuration for the Gloomhaven rulebook agent system."""
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -38,7 +36,7 @@ class Config:
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
     
     # Disable web search when using local models only
-    ENABLE_WEB_SEARCH = False
+    ENABLE_WEB_SEARCH = True
     
     @classmethod
     def ensure_directories(cls):
