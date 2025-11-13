@@ -41,28 +41,57 @@ class WebSearchTool:
         Returns:
             Search results as a string
         """
+        print("\n" + "="*70)
+        print("🌐 WEB SEARCH TRIGGERED")
+        print("="*70)
+        print(f"📥 Search Query: {query}")
+        print("="*70)
+        
         if self.tool is None:
-            return self._fallback_search(query)
+            print("⚠️  No API key available - using fallback message")
+            result = self._fallback_search(query)
+            print(f"📤 Fallback Result: {result[:200]}...")
+            print("="*70 + "\n")
+            return result
         
         try:
             results = self.tool.invoke({"query": query})
             
             if isinstance(results, list):
+                print(f"\n✅ Found {len(results)} web results:\n")
                 formatted_results = []
                 for i, result in enumerate(results, 1):
                     if isinstance(result, dict):
                         title = result.get('title', 'No title')
                         content = result.get('content', '')
                         url = result.get('url', '')
+                        
+                        # Print summary of each result
+                        print(f"  {i}. {title}")
+                        print(f"     URL: {url}")
+                        print(f"     Content preview: {content[:100]}...")
+                        print()
+                        
                         formatted_results.append(
                             f"{i}. {title}\n{content}\nSource: {url}\n"
                         )
-                return "\n".join(formatted_results)
+                
+                final_result = "\n".join(formatted_results)
+                print("="*70 + "\n")
+                return final_result
             
+            print(f"📤 Raw Result: {str(results)[:200]}...")
+            print("="*70 + "\n")
             return str(results)
             
         except Exception as e:
-            print(f"Error during web search, using fallback: {e}")
+            print(f"❌ Error during web search: {e}")
+            print("="*70 + "\n")
+            return f"Web search unavailable: {e}"
+    
+    def _fallback_search(self, query: str) -> str:
+        """Fallback message when web search is not available."""
+        return "Web search not available. Please provide a Tavily API key in the environment variables."
                 
     def as_langchain_tool(self) -> Tool:
         """
