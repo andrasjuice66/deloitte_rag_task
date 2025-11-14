@@ -1,5 +1,3 @@
-"""Main entry point for the Gloomhaven rulebook agent system."""
-
 from typing import Optional
 from pathlib import Path
 
@@ -50,20 +48,16 @@ class GloomhavenRulebookSystem:
         """
         print("Setting up Gloomhaven Rulebook Agent System...")
         
-        # Ensure directories exist
         Config.ensure_directories()
         
-        # Initialize RAG system
         print("\n1. Initializing RAG system...")
         self.rag_system = RAGSystem(pdf_path=self.pdf_path)
         self.rag_system.setup(force_recreate=force_recreate_vectorstore)
         
-        # Initialize web search tool. Even if remote web search is disabled,
-        # we still create the tool so that its internal fallback can be used.
+
         print("\n2. Initializing web search tool (with fallback)...")
         self.web_search_tool = WebSearchTool()
         
-        # Initialize agent
         print("\n3. Initializing agent...")
         self.agent = GloomhavenAgent(
             rag_system=self.rag_system,
@@ -73,11 +67,10 @@ class GloomhavenRulebookSystem:
             model_name=self.model_name
         )
         
-        # Initialize evaluator
         print("\n4. Initializing evaluator...")
         self.evaluator = AgentEvaluator(agent=self.agent)
         
-        print("\n✓ System setup complete!")
+        print("\n5. System setup complete!")
     
     def ask_question(self, question: str = None, needs_web_search: bool = False) -> AgentResponse:
         """

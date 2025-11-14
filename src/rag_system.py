@@ -1,5 +1,3 @@
-"""RAG (Retrieval Augmented Generation) system for the rulebook."""
-
 from typing import List, Optional
 from pathlib import Path
 
